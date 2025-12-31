@@ -8,8 +8,8 @@ import (
 	"path/filepath"
 	"strings"
 
-	"goff/templates/internal/config"
-	"goff/templates/internal/puzzle"
+	"goff/template/internal/config"
+	"goff/template/internal/puzzle"
 )
 
 const baseURL = "https://flipflop.slome.org"

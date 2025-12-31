@@ -9,12 +9,12 @@ import (
 	"strings"
 	"time"
 
-	"goff/templates/internal/config"
-	"goff/templates/internal/download"
-	"goff/templates/internal/puzzle"
-	"goff/templates/internal/puzzletext"
-	"goff/templates/internal/summary"
-	"goff/templates/internal/ui"
+	"goff/template/internal/config"
+	"goff/template/internal/download"
+	"goff/template/internal/puzzle"
+	"goff/template/internal/puzzletext"
+	"goff/template/internal/summary"
+	"goff/template/internal/ui"
 
 	"github.com/spf13/cobra"
 )

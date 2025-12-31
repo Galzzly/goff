@@ -11,10 +11,10 @@ import (
 	"strconv"
 	"strings"
 
-	"goff/templates/internal/bench"
-	"goff/templates/internal/config"
-	"goff/templates/internal/puzzletext"
-	"goff/templates/internal/score"
+	"goff/template/internal/bench"
+	"goff/template/internal/config"
+	"goff/template/internal/puzzletext"
+	"goff/template/internal/score"
 )
 
 const (

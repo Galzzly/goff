@@ -12,7 +12,7 @@ import (
 	"strings"
 	"text/template"
 
-	"goff/templates/internal/config"
+	"goff/template/internal/config"
 )
 
 type TemplateData struct {
