@@ -1,7 +1,7 @@
 # goff
 
 <p align="center">
-<img src=./templates/readme/logo.png>
+<img src=./template/readme/logo.png>
 </p>
 
 Go template for a fast and efficient FlipFlip Codes
