@@ -1,0 +1,76 @@
+package main
+
+import (
+	_ "embed"
+	"flag"
+	"fmt"
+	"os"
+	"strings"
+
+	tea "github.com/charmbracelet/bubbletea"
+	"github.com/charmbracelet/lipgloss"
+)
+
+//go:embed input.txt
+var inputData string
+
+//go:embed input_test.txt
+var inputTestData string
+
+const (
+	PuzzleYear = {{.Year}}
+	PuzzleID   = {{.Day}}
+)
+
+func main() {
+	useTest := flag.Bool("t", false, "use test input")
+	flag.Parse()
+
+	input := strings.TrimRight(inputData, "\n")
+	if *useTest {
+		input = strings.TrimRight(inputTestData, "\n")
+	}
+	part1 := Part1(input)
+	part2 := Part2(input)
+	part3 := Part3(input)
+
+	output := renderOutput([]any{part1, part2, part3})
+	program := tea.NewProgram(messageModel{content: output}, tea.WithOutput(os.Stdout))
+	_, _ = program.Run()
+}
+
+type messageModel struct {
+	content string
+}
+
+func (m messageModel) Init() tea.Cmd {
+	return tea.Quit
+}
+
+func (m messageModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
+	return m, tea.Quit
+}
+
+func (m messageModel) View() string {
+	return m.content + "\n"
+}
+
+func renderOutput(parts []any) string {
+	titleStyle := lipgloss.NewStyle().Bold(true)
+	labelStyle := lipgloss.NewStyle().Foreground(lipgloss.Color("69")).Bold(true)
+	valueStyle := lipgloss.NewStyle().Foreground(lipgloss.Color("42"))
+	boxStyle := lipgloss.NewStyle().
+		Border(lipgloss.RoundedBorder()).
+		BorderForeground(lipgloss.Color("240")).
+		Padding(1, 2)
+
+	title := titleStyle.Render(fmt.Sprintf("FlipFlop Puzzle %02d (%d)", PuzzleID, PuzzleYear))
+	rows := []string{
+		fmt.Sprintf("%s %s", labelStyle.Render("Part 1:"), valueStyle.Render(fmt.Sprint(parts[0]))),
+		fmt.Sprintf("%s %s", labelStyle.Render("Part 2:"), valueStyle.Render(fmt.Sprint(parts[1]))),
+		fmt.Sprintf("%s %s", labelStyle.Render("Part 3:"), valueStyle.Render(fmt.Sprint(parts[2]))),
+	}
+
+	content := lipgloss.JoinVertical(lipgloss.Left, append([]string{title}, rows...)...)
+	return boxStyle.Render(content)
+}

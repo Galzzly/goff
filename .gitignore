@@ -30,3 +30,13 @@ go.work.sum
 # Editor/IDE
 # .idea/
 # .vscode/
+
+# Puzzle inputs
+*/puzzle*/input.txt
+*/puzzle*/input_test.txt
+
+# Local auth config
+goff.config.json
+
+# Setup marker / local binaries
+.goff.setup
