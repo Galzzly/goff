@@ -54,19 +54,3 @@ Usage:
 # Update pointer + benchmark summary in README (requires stored PHPSESSID)
 ./goff summary
 ```
-
-<!-- GOFF:POINTERS:START -->
-# Flip Flop
-
-## Year : 2025
-
-### Pointers
-
-Pointers (2025): 0/21
-
-### Benchmarks
-
-No benchmarks yet.
-<!-- GOFF:POINTERS:END -->
-
-To keep the pointer/benchmark summary updated on push, add a repository secret named `FLIPFLOP_PHPSESSID`.
