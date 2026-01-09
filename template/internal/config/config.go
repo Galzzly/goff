@@ -13,7 +13,8 @@ import (
 const FileName = "goff.config.json"
 
 type Config struct {
-	PHPSESSID string `mapstructure:"phpsessid"`
+	PHPSESSID   string `mapstructure:"phpsessid"`
+	CurrentYear int    `mapstructure:"currentyear"`
 }
 
 func Load() (Config, error) {
@@ -48,6 +49,7 @@ func Save(cfg Config) error {
 	}
 
 	v.Set("phpsessid", cfg.PHPSESSID)
+	v.Set("currentyear", cfg.CurrentYear)
 
 	if err := v.WriteConfigAs(path); err != nil {
 		return fmt.Errorf("write config: %w", err)

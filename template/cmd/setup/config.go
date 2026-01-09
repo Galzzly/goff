@@ -1,15 +1,16 @@
 package main
 
 import (
-    "os"
-    "errors"
-    "fmt"
-    "path/filepath"
-    "encoding/json"
+	"encoding/json"
+	"errors"
+	"fmt"
+	"os"
+	"path/filepath"
 )
 
 type configData struct {
 	PHPSESSID string `json:"phpsessid"`
+	Year      int    `json:"currentyear"`
 }
 
 func loadConfig() (configData, error) {

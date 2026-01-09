@@ -1,7 +1,6 @@
 package main
 
 import (
-	"embed"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -13,14 +12,12 @@ import (
 	"goff/template/internal/download"
 	"goff/template/internal/puzzle"
 	"goff/template/internal/puzzletext"
+	"goff/template/internal/setup"
 	"goff/template/internal/summary"
 	"goff/template/internal/ui"
 
 	"github.com/spf13/cobra"
 )
-
-//go:embed templates/puzzle/*
-var templateFS embed.FS
 
 var rootCmd = &cobra.Command{
 	Use:           "goff",
@@ -32,7 +29,13 @@ var rootCmd = &cobra.Command{
 var yearFlag int
 
 func init() {
-	rootCmd.PersistentFlags().IntVarP(&yearFlag, "year", "y", time.Now().Year(), "puzzle year")
+	// Load default year from config if available, otherwise use current year
+	defaultYear := time.Now().Year()
+	if cfg, err := config.Load(); err == nil && cfg.CurrentYear > 0 {
+		defaultYear = cfg.CurrentYear
+	}
+
+	rootCmd.PersistentFlags().IntVarP(&yearFlag, "year", "y", defaultYear, "puzzle year")
 
 	rootCmd.AddCommand(newPrepareCmd())
 	rootCmd.AddCommand(newRunCmd())
@@ -41,6 +44,7 @@ func init() {
 	rootCmd.AddCommand(newSummaryCmd())
 	rootCmd.AddCommand(newDownloadCmd())
 	rootCmd.AddCommand(newSessionCmd())
+	rootCmd.AddCommand(newSetupCmd())
 }
 
 func Execute() {
@@ -75,7 +79,7 @@ func newPrepareCmd() *cobra.Command {
 				return err
 			}
 
-			if err := puzzle.Prepare(templateFS, year, day); err != nil {
+			if err := puzzle.Prepare(year, day); err != nil {
 				return err
 			}
 			ui.Success(os.Stdout, "Prepared puzzle", fmt.Sprintf("%d puzzle %02d", year, day))
@@ -371,4 +375,42 @@ func parseRunArgs(args []string, useTestFlag, useInputFlag bool) (int, int, bool
 		return 0, 0, false, err
 	}
 	return year, day, useTest, nil
+}
+
+func newSetupCmd() *cobra.Command {
+	cmd := &cobra.Command{
+		Use:     "setup [year]",
+		Aliases: []string{"init"},
+		Short:   "Set up a new year directory and configuration",
+		Args:    cobra.RangeArgs(0, 1),
+		RunE: func(cmd *cobra.Command, args []string) error {
+			year := time.Now().Year()
+			if len(args) == 1 {
+				parsedYear, err := parseYearArg(args[0])
+				if err != nil {
+					return err
+				}
+				year = parsedYear
+			}
+
+			if err := setup.SetupYear(year); err != nil {
+				return err
+			}
+
+			// Update config with the new current year
+			cfg, err := config.Load()
+			if err != nil {
+				return err
+			}
+			cfg.CurrentYear = year
+			if err := config.Save(cfg); err != nil {
+				return err
+			}
+
+			ui.Success(os.Stdout, "Year setup complete", fmt.Sprintf("%d directory created and configured", year))
+			return nil
+		},
+	}
+
+	return cmd
 }

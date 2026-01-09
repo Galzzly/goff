@@ -1,14 +1,14 @@
 package main
 
 import (
-    "os"
-    "fmt"
-    "path/filepath"
-    "time"
-    "io"
-    "errors"
-    "strconv"
-    "strings"
+	"errors"
+	"fmt"
+	"io"
+	"os"
+	"path/filepath"
+	"strconv"
+	"strings"
+	"time"
 )
 
 type buildChoice int
@@ -61,6 +61,16 @@ func main() {
 			fatal(err)
 		}
 		fmt.Fprintln(os.Stdout, "Workflow installed. Add repository secret FLIPFLOP_PHPSESSID for updates.")
+	}
+
+	// Save year to config
+	cfg, err := loadConfig()
+	if err != nil {
+		fatal(err)
+	}
+	cfg.Year = year
+	if err := saveConfig(cfg); err != nil {
+		fatal(err)
 	}
 
 	if err := os.WriteFile(filepath.Join(root, setupMarker), []byte(time.Now().Format(time.RFC3339)+"\n"), 0o644); err != nil {

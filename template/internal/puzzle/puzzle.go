@@ -3,7 +3,6 @@ package puzzle
 import (
 	"errors"
 	"fmt"
-	"io/fs"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -21,7 +20,7 @@ type TemplateData struct {
 	DayPadded string
 }
 
-func Prepare(templateFS fs.FS, year, day int) error {
+func Prepare(year, day int) error {
 	if day < 1 {
 		return fmt.Errorf("invalid puzzle day: %d", day)
 	}
@@ -37,7 +36,14 @@ func Prepare(templateFS fs.FS, year, day int) error {
 		return fmt.Errorf("create puzzle dir: %w", err)
 	}
 
-	entries, err := fs.ReadDir(templateFS, "templates/puzzle")
+	// Get the repo root to find templates
+	root, err := config.RepoRoot()
+	if err != nil {
+		return fmt.Errorf("get repo root: %w", err)
+	}
+
+	templateDir := filepath.Join(root, "template", "go", "puzzle")
+	entries, err := os.ReadDir(templateDir)
 	if err != nil {
 		return fmt.Errorf("read templates: %w", err)
 	}
@@ -53,8 +59,8 @@ func Prepare(templateFS fs.FS, year, day int) error {
 			continue
 		}
 
-		srcPath := filepath.Join("templates", "puzzle", entry.Name())
-		srcBytes, err := fs.ReadFile(templateFS, srcPath)
+		srcPath := filepath.Join(templateDir, entry.Name())
+		srcBytes, err := os.ReadFile(srcPath)
 		if err != nil {
 			return fmt.Errorf("read template %s: %w", entry.Name(), err)
 		}
@@ -68,8 +74,7 @@ func Prepare(templateFS fs.FS, year, day int) error {
 		targetPath := filepath.Join(dir, name)
 		if _, err := os.Stat(targetPath); err == nil {
 			return fmt.Errorf("file already exists: %s", targetPath)
-		}
-		if err != nil && !errors.Is(err, os.ErrNotExist) {
+		} else if !errors.Is(err, os.ErrNotExist) {
 			return fmt.Errorf("check file %s: %w", targetPath, err)
 		}
 
