@@ -123,7 +123,7 @@ func ensureYearReadme(root string, year int) error {
 	if _, err := os.Stat(readmePath); err == nil {
 		return nil
 	}
-	templatePath := filepath.Join(root, "templates", "README.year.tmpl")
+	templatePath := filepath.Join(root, "template", "README.year.tmpl")
 	content, err := renderReadmeTemplate(templatePath, year)
 	if err != nil {
 		return err
@@ -132,7 +132,7 @@ func ensureYearReadme(root string, year int) error {
 }
 
 func installWorkflowFiles(root string) error {
-	src := filepath.Join(root, "templates", ".github")
+	src := filepath.Join(root, "template", ".github")
 	dest := filepath.Join(root, ".github")
 	return copyDir(src, dest)
 }

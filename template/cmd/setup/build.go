@@ -1,15 +1,16 @@
 package main
 
 import (
-    "os"
-    "os/exec"
-    "path/filepath"
-    "fmt"
-    "errors"
+	"errors"
+	"fmt"
 	"io"
+	"os"
+	"os/exec"
+	"path/filepath"
+	"strings"
+
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
-	"strings"
 )
 
 type buildChoiceModel struct {
@@ -87,7 +88,7 @@ func promptBuildChoice(w io.Writer) (buildChoice, error) {
 }
 
 func buildBinary(root string) error {
-	cmd := exec.Command("go", "build", "-o", "goff", "./templates/cmd/goff")
+	cmd := exec.Command("go", "build", "-o", "goff", "./template/cmd/goff")
 	cmd.Dir = root
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
