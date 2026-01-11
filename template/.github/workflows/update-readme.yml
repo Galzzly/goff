@@ -17,9 +17,6 @@ jobs:
         with:
           go-version-file: go.mod
 
-      - name: Build CLI
-        run: go build -o goff ./templates/cmd/goff
-
       - name: Write config
         env:
           PHPSESSID: ${{ secrets.FLIPFLOP_PHPSESSID }}
@@ -31,7 +28,7 @@ jobs:
           printf '{"phpsessid":"%s"}\n' "$PHPSESSID" > goff.config.json
 
       - name: Update pointers and benchmarks
-        run: ./goff summary
+        run: go run template/workflow/main.go
 
       - name: Commit changes
         run: |
