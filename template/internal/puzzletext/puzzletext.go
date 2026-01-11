@@ -116,7 +116,10 @@ func collectParts(n *html.Node, parts map[int]struct{}) {
 			if attr.Key == "id" && strings.HasPrefix(attr.Val, "part-") {
 				value := strings.TrimPrefix(attr.Val, "part-")
 				if part, err := strconv.Atoi(value); err == nil {
-					parts[part] = struct{}{}
+					// part-0 is prologue, skip it. part-1, part-2, part-3 map directly to parts 1, 2, 3
+					if part > 0 {
+						parts[part] = struct{}{}
+					}
 				}
 			}
 		}

@@ -1,7 +1,6 @@
 package main
 
 import (
-	"bufio"
 	"bytes"
 	"encoding/json"
 	"errors"
@@ -9,7 +8,6 @@ import (
 	"io"
 	"net/http"
 	"os"
-	"os/exec"
 	"path/filepath"
 	"regexp"
 	"sort"
@@ -53,10 +51,10 @@ const (
 )
 
 var (
-	scoreRe      = regexp.MustCompile(`const score = ([0-9]+);`)
-	totalRe      = regexp.MustCompile(`completed <span class="score">\?</span>/([0-9]+) parts`)
-	benchLineRe  = regexp.MustCompile(`^BenchmarkSolve/part([1-3])-[0-9]+\s+\d+\s+([0-9.]+)\s+(ns/op)$`)
-	repoSlugRe   = regexp.MustCompile(`github\\.com[:/]+([^/]+)/([^/.]+)`)
+	scoreRe     = regexp.MustCompile(`const score = ([0-9]+);`)
+	totalRe     = regexp.MustCompile(`completed <span class="score">\?</span>/([0-9]+) parts`)
+	benchLineRe = regexp.MustCompile(`^BenchmarkSolve/part([1-3])-[0-9]+\s+\d+\s+([0-9.]+)\s+(ns/op)$`)
+	repoSlugRe  = regexp.MustCompile(`github\\.com[:/]+([^/]+)/([^/.]+)`)
 )
 
 func main() {
@@ -344,7 +342,10 @@ func collectParts(n *html.Node, parts map[int]struct{}) {
 			if attr.Key == "id" && strings.HasPrefix(attr.Val, "part-") {
 				value := strings.TrimPrefix(attr.Val, "part-")
 				if part, err := strconv.Atoi(value); err == nil {
-					parts[part] = struct{}{}
+					// part-0 is prologue, skip it. part-1, part-2, part-3 map directly to parts 1, 2, 3
+					if part > 0 {
+						parts[part] = struct{}{}
+					}
 				}
 			}
 		}
@@ -440,7 +441,7 @@ func formatPointerTable(puzzles []PuzzlePointers) string {
 
 func marker(ok bool) string {
 	if ok {
-		return "Y"
+		return "🩴"
 	}
 	return "-"
 }
