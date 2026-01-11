@@ -231,7 +231,7 @@ func formatPointerTable(puzzles []PuzzlePointers) string {
 
 func marker(ok bool) string {
 	if ok {
-		return "Y"
+		return "🩴"
 	}
 	return "-"
 }

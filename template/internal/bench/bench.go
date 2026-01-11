@@ -95,22 +95,27 @@ func formatDuration(nsText string) (string, error) {
 		return "", err
 	}
 
-	unit := "ns"
-	switch {
-	case value >= 1e9:
-		value /= 1e9
-		unit = "s"
-	case value >= 1e6:
-		value /= 1e6
-		unit = "ms"
-	case value >= 1e3:
-		value /= 1e3
-		unit = "us"
+	units := []struct {
+		threshold float64
+		divisor   float64
+		label     string
+	}{
+		{1e9, 1e9, "s"},
+		{1e6, 1e6, "ms"},
+		{1e3, 1e3, "μs"},
+		{0, 1, "ns"},
 	}
 
-	text := strconv.FormatFloat(value, 'f', 2, 64)
-	text = strings.TrimRight(strings.TrimRight(text, "0"), ".")
-	return fmt.Sprintf("%s %s", text, unit), nil
+	for _, u := range units {
+		if value >= u.threshold {
+			value /= u.divisor
+			text := strconv.FormatFloat(value, 'f', 2, 64)
+			text = strings.TrimRight(strings.TrimRight(text, "0"), ".")
+			return fmt.Sprintf("%s %s", text, u.label), nil
+		}
+	}
+
+	return "", fmt.Errorf("unable to format duration")
 }
 
 func parsePuzzleID(name string) (int, error) {
