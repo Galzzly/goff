@@ -188,7 +188,7 @@ func getYears(root string) ([]int, error) {
 }
 
 func buildSummary(year int, token, root string) (YearSummary, error) {
-	score, total, err := fetchScore(year, token)
+	_, total, err := fetchScore(year, token)
 	if err != nil {
 		return YearSummary{}, err
 	}
@@ -199,7 +199,26 @@ func buildSummary(year int, token, root string) (YearSummary, error) {
 		return YearSummary{}, err
 	}
 
+	// Calculate score by counting completed parts
+	score := calculateScore(puzzles)
+
 	return YearSummary{Year: year, Score: score, Total: total, Puzzles: puzzles}, nil
+}
+
+func calculateScore(puzzles []PuzzlePointers) int {
+	score := 0
+	for _, puzzle := range puzzles {
+		if puzzle.Part1 {
+			score++
+		}
+		if puzzle.Part2 {
+			score++
+		}
+		if puzzle.Part3 {
+			score++
+		}
+	}
+	return score
 }
 
 func fetchScore(year int, token string) (int, int, error) {
