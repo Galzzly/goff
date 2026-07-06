@@ -333,7 +333,7 @@ func repoSlug() string {
 	return parseRepoSlug(output)
 }
 
-var repoSlugRe = regexp.MustCompile(`github\\.com[:/]+([^/]+)/([^/.]+)`)
+var repoSlugRe = regexp.MustCompile(`github\.com[:/]+([^/]+)/([^/.]+)`)
 
 func parseRepoSlug(url string) string {
 	if url == "" {

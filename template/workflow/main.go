@@ -53,9 +53,8 @@ const (
 )
 
 var (
-	scoreRe    = regexp.MustCompile(`const score = ([0-9]+);`)
-	totalRe    = regexp.MustCompile(`completed <span class="score">\?</span>/([0-9]+) parts`)
-	repoSlugRe = regexp.MustCompile(`github\\.com[:/]+([^/]+)/([^/.]+)`)
+	scoreRe = regexp.MustCompile(`const score = ([0-9]+);`)
+	totalRe = regexp.MustCompile(`completed <span class="score">\?</span>/([0-9]+) parts`)
 )
 
 func main() {
