@@ -11,6 +11,7 @@ import (
 	"strings"
 	"text/template"
 
+	"goff/template/internal/bench"
 	"goff/template/internal/config"
 )
 
@@ -144,12 +145,16 @@ func Bench(year, day int) error {
 		return fmt.Errorf("puzzle dir not found: %s", dir)
 	}
 
-	cmd := exec.Command("go", "test", "-bench", ".", "-run", "^$")
-	cmd.Dir = dir
-	cmd.Stdout = os.Stdout
-	cmd.Stderr = os.Stderr
+	result, err := bench.RunPuzzle(dir, day, os.Stdout)
+	if err != nil {
+		return err
+	}
 
-	return cmd.Run()
+	if err := bench.Record(filepath.Dir(dir), result); err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func Dir(year, day int) (string, error) {

@@ -44,7 +44,7 @@ func Build(year int, token string, root string) (YearSummary, error) {
 	}
 
 	yearDir := filepath.Join(root, fmt.Sprintf("%d", year))
-	benchResults, err := bench.Collect(yearDir)
+	benchResults, err := bench.Load(yearDir)
 	if err != nil {
 		return YearSummary{}, err
 	}
