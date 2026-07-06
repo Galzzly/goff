@@ -26,6 +26,7 @@ type YearSummary struct {
 	Year    int
 	Score   int
 	Total   int
+	Bench   []BenchResult
 	Puzzles []PuzzlePointers
 }
 
@@ -37,24 +38,23 @@ type PuzzlePointers struct {
 }
 
 type BenchResult struct {
-	PuzzleID int
-	Part1    string
-	Part2    string
-	Part3    string
+	PuzzleID int    `json:"puzzle"`
+	Part1    string `json:"part1"`
+	Part2    string `json:"part2"`
+	Part3    string `json:"part3"`
 }
 
 const (
 	baseURL     = "https://flipflop.slome.org"
 	configFile  = "goff.config.json"
+	benchFile   = "benchmarks.json"
 	readmeStart = "<!-- GOFF:POINTERS:START -->"
 	readmeEnd   = "<!-- GOFF:POINTERS:END -->"
 )
 
 var (
-	scoreRe     = regexp.MustCompile(`const score = ([0-9]+);`)
-	totalRe     = regexp.MustCompile(`completed <span class="score">\?</span>/([0-9]+) parts`)
-	benchLineRe = regexp.MustCompile(`^BenchmarkSolve/part([1-3])-[0-9]+\s+\d+\s+([0-9.]+)\s+(ns/op)$`)
-	repoSlugRe  = regexp.MustCompile(`github\\.com[:/]+([^/]+)/([^/.]+)`)
+	scoreRe = regexp.MustCompile(`const score = ([0-9]+);`)
+	totalRe = regexp.MustCompile(`completed <span class="score">\?</span>/([0-9]+) parts`)
 )
 
 func main() {
@@ -188,7 +188,7 @@ func getYears(root string) ([]int, error) {
 }
 
 func buildSummary(year int, token, root string) (YearSummary, error) {
-	score, total, err := fetchScore(year, token)
+	_, total, err := fetchScore(year, token)
 	if err != nil {
 		return YearSummary{}, err
 	}
@@ -199,7 +199,54 @@ func buildSummary(year int, token, root string) (YearSummary, error) {
 		return YearSummary{}, err
 	}
 
-	return YearSummary{Year: year, Score: score, Total: total, Puzzles: puzzles}, nil
+	benchResults, err := loadBench(yearDir)
+	if err != nil {
+		return YearSummary{}, err
+	}
+
+	// Calculate score by counting completed parts
+	score := calculateScore(puzzles)
+
+	return YearSummary{Year: year, Score: score, Total: total, Bench: benchResults, Puzzles: puzzles}, nil
+}
+
+// loadBench reads the committed benchmark results file for a year directory.
+// The file is produced by `goff bench`; a missing file yields no results.
+func loadBench(yearDir string) ([]BenchResult, error) {
+	data, err := os.ReadFile(filepath.Join(yearDir, benchFile))
+	if err != nil {
+		if os.IsNotExist(err) {
+			return nil, nil
+		}
+		return nil, fmt.Errorf("read benchmarks: %w", err)
+	}
+
+	var results []BenchResult
+	if err := json.Unmarshal(data, &results); err != nil {
+		return nil, fmt.Errorf("parse benchmarks: %w", err)
+	}
+
+	sort.Slice(results, func(i, j int) bool {
+		return results[i].PuzzleID < results[j].PuzzleID
+	})
+
+	return results, nil
+}
+
+func calculateScore(puzzles []PuzzlePointers) int {
+	score := 0
+	for _, puzzle := range puzzles {
+		if puzzle.Part1 {
+			score++
+		}
+		if puzzle.Part2 {
+			score++
+		}
+		if puzzle.Part3 {
+			score++
+		}
+	}
+	return score
 }
 
 func fetchScore(year int, token string) (int, int, error) {
@@ -422,9 +469,23 @@ func formatSummary(summary YearSummary) string {
 	}
 
 	lines = append(lines, "", "### Benchmarks", "")
-	lines = append(lines, "No benchmarks yet.")
+	if len(summary.Bench) == 0 {
+		lines = append(lines, "No benchmarks yet.")
+	} else {
+		lines = append(lines, "| Puzzle | Part 1 | Part 2 | Part 3 |", "| --- | --- | --- | --- |")
+		for _, row := range summary.Bench {
+			lines = append(lines, fmt.Sprintf("| %02d | %s | %s | %s |", row.PuzzleID, defaultBench(row.Part1), defaultBench(row.Part2), defaultBench(row.Part3)))
+		}
+	}
 
 	return strings.Join(lines, "\n")
+}
+
+func defaultBench(value string) string {
+	if strings.TrimSpace(value) == "" {
+		return "-"
+	}
+	return value
 }
 
 func formatPointerTable(puzzles []PuzzlePointers) string {

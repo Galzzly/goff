@@ -38,13 +38,13 @@ type PuzzlePointers struct {
 }
 
 func Build(year int, token string, root string) (YearSummary, error) {
-	scoreValue, total, err := score.Fetch(year, token)
+	_, total, err := score.Fetch(year, token)
 	if err != nil {
 		return YearSummary{}, err
 	}
 
 	yearDir := filepath.Join(root, fmt.Sprintf("%d", year))
-	benchResults, err := bench.Collect(yearDir)
+	benchResults, err := bench.Load(yearDir)
 	if err != nil {
 		return YearSummary{}, err
 	}
@@ -54,7 +54,26 @@ func Build(year int, token string, root string) (YearSummary, error) {
 		return YearSummary{}, err
 	}
 
+	// Calculate score by counting completed parts
+	scoreValue := calculateScore(puzzles)
+
 	return YearSummary{Year: year, Score: scoreValue, Total: total, Bench: benchResults, Puzzles: puzzles}, nil
+}
+
+func calculateScore(puzzles []PuzzlePointers) int {
+	score := 0
+	for _, puzzle := range puzzles {
+		if puzzle.Part1 {
+			score++
+		}
+		if puzzle.Part2 {
+			score++
+		}
+		if puzzle.Part3 {
+			score++
+		}
+	}
+	return score
 }
 
 func UpdateReadme(path string, summary YearSummary) error {
@@ -314,7 +333,7 @@ func repoSlug() string {
 	return parseRepoSlug(output)
 }
 
-var repoSlugRe = regexp.MustCompile(`github\\.com[:/]+([^/]+)/([^/.]+)`)
+var repoSlugRe = regexp.MustCompile(`github\.com[:/]+([^/]+)/([^/.]+)`)
 
 func parseRepoSlug(url string) string {
 	if url == "" {

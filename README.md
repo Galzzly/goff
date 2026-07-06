@@ -92,6 +92,11 @@ goff bench
 goff b
 ```
 
+Each run prints the `go test` benchmark output and records the puzzle's timings
+to `<year>/benchmarks.json`. This file is committed and read by the **Update
+README** workflow to render the benchmark table — so run `goff bench` for a
+puzzle whenever you want its results reflected in the README.
+
 ### Downloading Inputs
 
 Download puzzle inputs (requires PHPSESSID):
